@@ -1,0 +1,50 @@
+<% if (!tickets.length) { %>
+  <div class="empty">
+    <%- icon('inbox', 36) %>
+    <h3>Nenhum chamado encontrado</h3>
+    <p>Ajuste os filtros ou abra um novo chamado.</p>
+    <a href="/tickets/new" class="btn btn-primary"><%- icon('plus') %> Novo chamado</a>
+  </div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Protocolo</th>
+          <th>Chamado</th>
+          <th>Categoria</th>
+          <th>Prioridade</th>
+          <th>Status</th>
+          <th>Responsável</th>
+          <th>Aberto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% tickets.forEach(function (t) { %>
+          <tr data-href="/tickets/<%= t.id %>">
+            <td><a href="/tickets/<%= t.id %>" class="ticket-code"><%= t.protocolo %></a></td>
+            <td class="cell-main">
+              <a href="/tickets/<%= t.id %>"><strong><%= t.titulo %></strong></a>
+              <span class="muted"><%= t.solicitante %><%= t.setor ? ' · ' + t.setor : '' %></span>
+            </td>
+            <td>
+              <% if (t.categoria) { %>
+                <span class="chip"><span class="dot" style="background: <%= t.categoria.cor %>"></span><%= t.categoria.nome %></span>
+              <% } else { %><span class="muted">—</span><% } %>
+            </td>
+            <td><span class="badge badge-<%= PRIORIDADES[t.prioridade].cor %>"><%= PRIORIDADES[t.prioridade].label %></span></td>
+            <td><span class="status status-<%= STATUS[t.status].cor %>"><%= STATUS[t.status].label %></span></td>
+            <td>
+              <% if (t.tecnico) { %>
+                <span class="person"><span class="avatar avatar-sm"><%= t.tecnico.iniciais %></span><%= t.tecnico.nome %></span>
+              <% } else { %>
+                <span class="muted">Não atribuído</span>
+              <% } %>
+            </td>
+            <td class="nowrap muted" title="<%= formatDate(t.createdAt) %>"><%= timeAgo(t.createdAt) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>

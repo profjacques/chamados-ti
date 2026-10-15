@@ -1,0 +1,144 @@
+<%- include('partials/header') %>
+
+<header class="page-header">
+  <div>
+    <p class="eyebrow"><%= formatDate(new Date(), false) %></p>
+    <h1>Painel de chamados</h1>
+    <p class="subtitle">Visão geral da fila de suporte e da carga da equipe.</p>
+  </div>
+  <a href="/tickets/new" class="btn btn-primary" id="dash-new-ticket"><%- icon('plus') %> Abrir chamado</a>
+</header>
+
+<section class="stats" aria-label="Indicadores">
+  <a href="/tickets?status=ativos" class="stat-card stat-indigo" id="stat-ativos">
+    <span class="stat-icon"><%- icon('inbox', 22) %></span>
+    <span class="stat-label">Em aberto</span>
+    <span class="stat-value" data-count="<%= ativos %>"><%= ativos %></span>
+    <span class="stat-foot"><%= total %> chamados no total</span>
+  </a>
+  <a href="/tickets?status=em_andamento" class="stat-card stat-amber" id="stat-andamento">
+    <span class="stat-icon"><%- icon('activity', 22) %></span>
+    <span class="stat-label">Em andamento</span>
+    <span class="stat-value" data-count="<%= porStatus.em_andamento %>"><%= porStatus.em_andamento %></span>
+    <span class="stat-foot"><%= porStatus.aberto %> aguardando atendimento</span>
+  </a>
+  <a href="/tickets?tecnico=nenhum&status=ativos" class="stat-card stat-red" id="stat-sem-tecnico">
+    <span class="stat-icon"><%- icon('alert', 22) %></span>
+    <span class="stat-label">Sem responsável</span>
+    <span class="stat-value" data-count="<%= semTecnico %>"><%= semTecnico %></span>
+    <span class="stat-foot">precisam ser atribuídos</span>
+  </a>
+  <a href="/tickets?status=resolvido" class="stat-card stat-green" id="stat-resolvidos">
+    <span class="stat-icon"><%- icon('check', 22) %></span>
+    <span class="stat-label">Resolvidos</span>
+    <span class="stat-value" data-count="<%= porStatus.resolvido + porStatus.fechado %>"><%= porStatus.resolvido + porStatus.fechado %></span>
+    <span class="stat-foot">tempo médio: <%= formatDuration(tempoMedio) %></span>
+  </a>
+</section>
+
+<div class="grid-dash">
+  <section class="card" aria-labelledby="h-prioritarios">
+    <div class="card-head">
+      <h2 id="h-prioritarios"><%- icon('zap') %> Fila prioritária</h2>
+      <a href="/tickets?status=ativos" class="link-muted">Ver todos</a>
+    </div>
+    <% if (!prioritarios.length) { %>
+      <div class="empty small"><%- icon('check', 28) %><p>Nenhum chamado crítico ou de alta prioridade em aberto. 🎉</p></div>
+    <% } else { %>
+      <ul class="ticket-list">
+        <% prioritarios.forEach(function (t) { %>
+          <li>
+            <a href="/tickets/<%= t.id %>" class="ticket-row prio-<%= t.prioridade %>">
+              <span class="prio-bar"></span>
+              <div class="ticket-row-main">
+                <span class="ticket-code"><%= t.protocolo %></span>
+                <strong><%= t.titulo %></strong>
+                <span class="muted"><%= t.solicitante %><%= t.setor ? ' · ' + t.setor : '' %> · <%= timeAgo(t.createdAt) %></span>
+              </div>
+              <div class="ticket-row-side">
+                <span class="badge badge-<%= PRIORIDADES[t.prioridade].cor %>"><%= PRIORIDADES[t.prioridade].label %></span>
+                <% if (t.tecnico) { %>
+                  <span class="avatar avatar-sm" title="<%= t.tecnico.nome %>"><%= t.tecnico.iniciais %></span>
+                <% } else { %>
+                  <span class="avatar avatar-sm avatar-empty" title="Sem responsável">?</span>
+                <% } %>
+              </div>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section class="card" aria-labelledby="h-prioridade">
+    <div class="card-head"><h2 id="h-prioridade"><%- icon('alert') %> Abertos por prioridade</h2></div>
+    <% const maxP = Math.max(1, ...Object.values(porPrioridade)); %>
+    <div class="bars">
+      <% Object.keys(PRIORIDADES).slice().reverse().forEach(function (p) { %>
+        <a class="bar-row" href="/tickets?status=ativos&prioridade=<%= p %>">
+          <span class="bar-label"><%= PRIORIDADES[p].label %></span>
+          <span class="bar-track"><span class="bar-fill fill-<%= PRIORIDADES[p].cor %>" style="--w: <%= (porPrioridade[p] / maxP) * 100 %>%"></span></span>
+          <span class="bar-value"><%= porPrioridade[p] %></span>
+        </a>
+      <% }) %>
+    </div>
+
+    <div class="status-strip" aria-label="Distribuição por status">
+      <% Object.keys(STATUS).forEach(function (s) { if (!porStatus[s]) return; %>
+        <span class="strip-seg fill-<%= STATUS[s].cor %>" style="flex: <%= porStatus[s] %>" title="<%= STATUS[s].label %>: <%= porStatus[s] %>"></span>
+      <% }) %>
+    </div>
+    <ul class="legend">
+      <% Object.keys(STATUS).forEach(function (s) { %>
+        <li><span class="dot fill-<%= STATUS[s].cor %>"></span><%= STATUS[s].label %> <strong><%= porStatus[s] %></strong></li>
+      <% }) %>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="h-equipe">
+    <div class="card-head">
+      <h2 id="h-equipe"><%- icon('users') %> Carga da equipe</h2>
+      <a href="/technicians" class="link-muted">Gerenciar</a>
+    </div>
+    <% const maxT = Math.max(1, ...tecnicos.map(function (t) { return t.ativos; })); %>
+    <ul class="team">
+      <% tecnicos.forEach(function (t) { %>
+        <li>
+          <span class="avatar"><%= t.iniciais %></span>
+          <div class="team-info">
+            <div class="team-top"><strong><%= t.nome %></strong><span class="muted"><%= t.ativos %> ativos · <%= t.resolvidos %> concluídos</span></div>
+            <span class="bar-track"><span class="bar-fill fill-indigo" style="--w: <%= (t.ativos / maxT) * 100 %>%"></span></span>
+          </div>
+        </li>
+      <% }) %>
+      <% if (!tecnicos.length) { %><li class="muted">Nenhum técnico ativo cadastrado.</li><% } %>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="h-categorias">
+    <div class="card-head">
+      <h2 id="h-categorias"><%- icon('tag') %> Por categoria</h2>
+      <a href="/categories" class="link-muted">Gerenciar</a>
+    </div>
+    <% const maxC = Math.max(1, ...categorias.map(function (c) { return c.total; })); %>
+    <div class="bars">
+      <% categorias.forEach(function (c) { %>
+        <div class="bar-row">
+          <span class="bar-label"><span class="dot" style="background: <%= c.cor %>"></span><%= c.nome %></span>
+          <span class="bar-track"><span class="bar-fill" style="--w: <%= (c.total / maxC) * 100 %>%; background: <%= c.cor %>"></span></span>
+          <span class="bar-value"><%= c.total %></span>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="h-recentes">
+  <div class="card-head">
+    <h2 id="h-recentes"><%- icon('clock') %> Chamados recentes</h2>
+    <a href="/tickets" class="link-muted">Ver todos</a>
+  </div>
+  <%- include('tickets/_table', { tickets: recentes }) %>
+</section>
+
+<%- include('partials/footer') %>

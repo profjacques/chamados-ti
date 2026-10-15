@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Cadastros</p>
+    <h1>Técnicos</h1>
+    <p class="subtitle">Equipe responsável pelo atendimento dos chamados.</p>
+  </div>
+  <a href="/technicians/new" class="btn btn-primary" id="tech-new"><%- icon('plus') %> Novo técnico</a>
+</header>
+
+<% if (!tecnicos.length) { %>
+  <div class="card empty"><%- icon('users', 36) %><h3>Nenhum técnico cadastrado</h3><a href="/technicians/new" class="btn btn-primary"><%- icon('plus') %> Cadastrar técnico</a></div>
+<% } else { %>
+  <div class="cards-grid">
+    <% tecnicos.forEach(function (t) { %>
+      <article class="card entity-card <%= t.ativo ? '' : 'is-inactive' %>">
+        <div class="entity-head">
+          <span class="avatar avatar-lg"><%= t.iniciais %></span>
+          <div>
+            <h3><%= t.nome %></h3>
+            <p class="muted"><%= t.especialidade || 'Sem especialidade definida' %></p>
+          </div>
+          <span class="status <%= t.ativo ? 'status-green' : 'status-gray' %>"><%= t.ativo ? 'Ativo' : 'Inativo' %></span>
+        </div>
+        <p class="entity-meta"><%- icon('mail', 14) %> <%= t.email %></p>
+        <div class="entity-stats">
+          <a href="/tickets?tecnico=<%= t.id %>&status=ativos"><strong><%= t.ativos %></strong><span>ativos</span></a>
+          <a href="/tickets?tecnico=<%= t.id %>"><strong><%= t.concluidos %></strong><span>concluídos</span></a>
+        </div>
+        <div class="entity-actions">
+          <a href="/technicians/<%= t.id %>/edit" class="btn btn-secondary btn-sm" id="tech-edit-<%= t.id %>"><%- icon('edit', 14) %> Editar</a>
+          <form method="POST" action="/technicians/<%= t.id %>?_method=DELETE" data-confirm="Remover <%= t.nome %>? Os chamados dele ficarão sem responsável.">
+            <button type="submit" class="btn btn-ghost btn-sm danger-text" id="tech-delete-<%= t.id %>"><%- icon('trash', 14) %> Remover</button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

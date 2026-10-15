@@ -1,0 +1,99 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <a href="<%= isEdit ? '/tickets/' + ticket.id : '/tickets' %>" class="back-link"><%- icon('back', 16) %> Voltar</a>
+    <h1><%= isEdit ? 'Editar chamado ' + ticket.protocolo : 'Abrir novo chamado' %></h1>
+    <p class="subtitle"><%= isEdit ? 'Atualize as informações do chamado.' : 'Descreva o problema com o máximo de detalhes possível.' %></p>
+  </div>
+</header>
+
+<%- include('../partials/errors') %>
+
+<form method="POST" action="<%= isEdit ? '/tickets/' + ticket.id + '?_method=PUT' : '/tickets' %>" class="form-layout" id="ticket-form" novalidate>
+  <section class="card">
+    <h2 class="form-section"><%- icon('ticket') %> Detalhes do problema</h2>
+
+    <div class="field">
+      <label for="titulo">Título <span class="req">*</span></label>
+      <input type="text" id="titulo" name="titulo" value="<%= ticket.titulo || '' %>" maxlength="150" placeholder="Ex.: Impressora não imprime" required autofocus>
+    </div>
+
+    <div class="field">
+      <label for="descricao">Descrição <span class="req">*</span></label>
+      <textarea id="descricao" name="descricao" rows="7" placeholder="O que aconteceu? Desde quando? Alguma mensagem de erro?" required><%= ticket.descricao || '' %></textarea>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="categoryId">Categoria</label>
+        <select id="categoryId" name="categoryId">
+          <option value="">Selecione…</option>
+          <% categorias.forEach(function (c) { %>
+            <option value="<%= c.id %>" <%= String(ticket.categoryId) === String(c.id) ? 'selected' : '' %>><%= c.nome %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="technicianId">Técnico responsável</label>
+        <select id="technicianId" name="technicianId">
+          <option value="">Não atribuído</option>
+          <% tecnicos.forEach(function (t) { %>
+            <option value="<%= t.id %>" <%= String(ticket.technicianId) === String(t.id) ? 'selected' : '' %>><%= t.nome %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <fieldset class="field">
+      <legend>Prioridade</legend>
+      <div class="segmented">
+        <% Object.keys(PRIORIDADES).forEach(function (p) { %>
+          <label class="seg seg-<%= PRIORIDADES[p].cor %>">
+            <input type="radio" name="prioridade" value="<%= p %>" id="prio-<%= p %>" <%= ticket.prioridade === p ? 'checked' : '' %>>
+            <span><%= PRIORIDADES[p].label %></span>
+          </label>
+        <% }) %>
+      </div>
+    </fieldset>
+
+    <% if (isEdit) { %>
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <% Object.keys(STATUS).forEach(function (s) { %>
+            <option value="<%= s %>" <%= ticket.status === s ? 'selected' : '' %>><%= STATUS[s].label %></option>
+          <% }) %>
+        </select>
+      </div>
+    <% } %>
+  </section>
+
+  <aside class="card">
+    <h2 class="form-section"><%- icon('user') %> Solicitante</h2>
+    <div class="field">
+      <label for="solicitante">Nome <span class="req">*</span></label>
+      <input type="text" id="solicitante" name="solicitante" value="<%= ticket.solicitante || '' %>" placeholder="Quem está solicitando?" required>
+    </div>
+    <div class="field">
+      <label for="emailSolicitante">E-mail</label>
+      <input type="email" id="emailSolicitante" name="emailSolicitante" value="<%= ticket.emailSolicitante || '' %>" placeholder="nome@empresa.com">
+    </div>
+    <div class="field">
+      <label for="setor">Setor</label>
+      <select id="setor" name="setor">
+        <option value="">Selecione…</option>
+        <% SETORES.forEach(function (s) { %>
+          <option value="<%= s %>" <%= ticket.setor === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-block" id="ticket-submit"><%- icon('check') %> <%= isEdit ? 'Salvar alterações' : 'Abrir chamado' %></button>
+      <a href="<%= isEdit ? '/tickets/' + ticket.id : '/tickets' %>" class="btn btn-ghost btn-block" id="ticket-cancel">Cancelar</a>
+    </div>
+  </aside>
+</form>
+
+<%- include('../partials/footer') %>
