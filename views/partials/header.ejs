@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> · HelpDesk TI</title>
+  <meta name="description" content="HelpDesk TI — sistema local para abertura, acompanhamento e organização de chamados de suporte de TI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="/" class="brand" id="brand-link">
+        <span class="brand-logo"><%- icon('zap', 20) %></span>
+        <span class="brand-text">HelpDesk<strong>TI</strong></span>
+      </a>
+
+      <nav class="nav" aria-label="Navegação principal">
+        <span class="nav-label">Geral</span>
+        <a href="/" id="nav-dashboard" class="nav-link <%= currentPath === '/' ? 'active' : '' %>"><%- icon('dashboard') %><span>Dashboard</span></a>
+        <a href="/tickets" id="nav-tickets" class="nav-link <%= currentPath.startsWith('/tickets') ? 'active' : '' %>"><%- icon('ticket') %><span>Chamados</span></a>
+        <span class="nav-label">Cadastros</span>
+        <a href="/technicians" id="nav-technicians" class="nav-link <%= currentPath.startsWith('/technicians') ? 'active' : '' %>"><%- icon('users') %><span>Técnicos</span></a>
+        <a href="/categories" id="nav-categories" class="nav-link <%= currentPath.startsWith('/categories') ? 'active' : '' %>"><%- icon('tag') %><span>Categorias</span></a>
+      </nav>
+
+      <a href="/tickets/new" class="btn btn-primary btn-block sidebar-cta" id="sidebar-new-ticket"><%- icon('plus') %> Novo chamado</a>
+    </aside>
+
+    <main class="main">
+      <% if (msg) { %>
+        <div class="toast toast-success" role="status" data-toast><%- icon('check') %><span><%= msg %></span><button type="button" class="toast-close" aria-label="Fechar" data-toast-close><%- icon('x', 16) %></button></div>
+      <% } %>
+      <% if (erro) { %>
+        <div class="toast toast-error" role="alert" data-toast><%- icon('alert') %><span><%= erro %></span><button type="button" class="toast-close" aria-label="Fechar" data-toast-close><%- icon('x', 16) %></button></div>
+      <% } %>

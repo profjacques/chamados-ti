@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <a href="/categories" class="back-link"><%- icon('back', 16) %> Categorias</a>
+    <h1><%= isEdit ? 'Editar categoria' : 'Nova categoria' %></h1>
+  </div>
+</header>
+
+<%- include('../partials/errors') %>
+
+<form method="POST" action="<%= isEdit ? '/categories/' + categoria.id + '?_method=PUT' : '/categories' %>" class="card form-narrow" id="cat-form" novalidate>
+  <div class="field">
+    <label for="nome">Nome <span class="req">*</span></label>
+    <input type="text" id="nome" name="nome" value="<%= categoria.nome || '' %>" required autofocus>
+  </div>
+  <div class="field">
+    <label for="descricao">Descrição</label>
+    <input type="text" id="descricao" name="descricao" value="<%= categoria.descricao || '' %>" maxlength="255">
+  </div>
+  <div class="field">
+    <label for="cor">Cor</label>
+    <div class="color-field">
+      <input type="color" id="cor" name="cor" value="<%= categoria.cor || '#6366f1' %>">
+      <div class="swatches">
+        <% ['#6366f1','#a855f7','#ec4899','#ef4444','#f59e0b','#10b981','#06b6d4','#64748b'].forEach(function (cor) { %>
+          <button type="button" class="swatch" style="background: <%= cor %>" data-color="<%= cor %>" aria-label="Usar cor <%= cor %>"></button>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions row">
+    <a href="/categories" class="btn btn-ghost" id="cat-cancel">Cancelar</a>
+    <button type="submit" class="btn btn-primary" id="cat-submit"><%- icon('check') %> Salvar</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

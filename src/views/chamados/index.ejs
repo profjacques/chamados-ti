@@ -1,0 +1,92 @@
+<%- include('../partials/header', { titulo: 'Todos os chamados' }) %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <h1>Todos os chamados</h1>
+    <p class="subtitulo"><%= chamados.length %> <%= chamados.length === 1 ? 'chamado encontrado' : 'chamados encontrados' %></p>
+  </div>
+</div>
+
+<form class="filtros" method="get" action="/chamados">
+  <div class="campo">
+    <label for="q">Buscar</label>
+    <input id="q" name="q" type="search" value="<%= filtros.q %>" placeholder="Título, descrição ou pessoa">
+  </div>
+  <div class="campo">
+    <label for="status">Etapa</label>
+    <select id="status" name="status">
+      <option value="">Todas</option>
+      <% C.STATUS.forEach(function (s) { %>
+        <option value="<%= s.valor %>" <%= filtros.status === s.valor ? 'selected' : '' %>><%= s.rotulo %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="campo">
+    <label for="prioridade">Prioridade</label>
+    <select id="prioridade" name="prioridade">
+      <option value="">Todas</option>
+      <% C.PRIORIDADES.forEach(function (p) { %>
+        <option value="<%= p.valor %>" <%= filtros.prioridade === p.valor ? 'selected' : '' %>><%= p.rotulo %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="campo">
+    <label for="categoria">Categoria</label>
+    <select id="categoria" name="categoria">
+      <option value="">Todas</option>
+      <% C.CATEGORIAS.forEach(function (cat) { %>
+        <option value="<%= cat %>" <%= filtros.categoria === cat ? 'selected' : '' %>><%= cat %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="filtros-acoes">
+    <button class="botao" type="submit">Filtrar</button>
+    <% if (filtrado) { %><a class="botao-link" href="/chamados">Limpar filtros</a><% } %>
+  </div>
+</form>
+
+<% if (!chamados.length) { %>
+  <div class="painel vazio-grande">
+    <% if (filtrado) { %>
+      <p>Nenhum chamado corresponde a esses filtros.</p>
+      <a class="botao-contorno" href="/chamados">Limpar filtros</a>
+    <% } else { %>
+      <p>Ainda não há chamados. Abra o primeiro para começar a organizar o atendimento.</p>
+      <a class="botao" href="/chamados/novo">Novo chamado</a>
+    <% } %>
+  </div>
+<% } else { %>
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Chamado</th>
+          <th>Categoria</th>
+          <th>Prioridade</th>
+          <th>Etapa</th>
+          <th>Responsável</th>
+          <th>Aberto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% chamados.forEach(function (c) { %>
+          <tr>
+            <td><span class="codigo"><%= c.codigo %></span></td>
+            <td>
+              <a class="titulo-linha" href="/chamados/<%= c.id %>"><%= c.titulo %></a>
+              <span class="meta-linha"><%= c.solicitante %><% if (c.setor) { %> (<%= c.setor %>)<% } %></span>
+            </td>
+            <td><%= c.categoria %></td>
+            <td><span class="selo selo-prio-<%= c.prioridade %>"><%= C.rotuloPrioridade(c.prioridade) %></span></td>
+            <td><span class="selo selo-status-<%= c.status %>"><%= C.rotuloStatus(c.status) %></span></td>
+            <td><%= c.responsavel || '-' %></td>
+            <td><%= fmt.idade(c.createdAt) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

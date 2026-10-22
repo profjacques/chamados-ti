@@ -1,0 +1,11 @@
+<%- include('partials/header') %>
+
+<div class="card empty page-empty">
+  <span class="big-code">500</span>
+  <h1>Algo deu errado</h1>
+  <p>Ocorreu um erro inesperado ao processar sua solicitação.</p>
+  <pre class="error-detail"><%= error && error.message %></pre>
+  <a href="/" class="btn btn-primary" id="error-home"><%- icon('back', 16) %> Voltar ao dashboard</a>
+</div>
+
+<%- include('partials/footer') %>
