@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Sistema de organização de chamados de TI (MVC com Node.js, Express, EJS e Sequelize)",
   "main": "app.js",
+  "engines": {
+    "node": ">=20.0.0 <23.0.0"},
   "scripts": {
     "start": "node app.js",
     "prestart": "node seeders/seed.js",
-    "postinstall": "npm rebuild sqlite3",
+    "build": "npm rebuild sqlite3 --build-from-source",
     "dev": "node --watch app.js",
     "seed": "node seeders/seed.js"
   },
