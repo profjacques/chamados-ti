@@ -1,0 +1,13 @@
+<a class="cartao prioridade-<%= c.prioridade %>" href="/chamados/<%= c.id %>">
+  <span class="codigo"><%= c.codigo %></span>
+  <strong class="cartao-titulo"><%= c.titulo %></strong>
+  <span class="cartao-meta"><%= c.solicitante %><% if (c.setor) { %> (<%= c.setor %>)<% } %></span>
+  <span class="cartao-linha">
+    <span class="selo selo-prio-<%= c.prioridade %>"><%= C.rotuloPrioridade(c.prioridade) %></span>
+    <span class="cartao-categoria"><%= c.categoria %></span>
+  </span>
+  <span class="cartao-rodape">
+    <span class="<%= c.responsavel ? '' : 'sem-responsavel' %>"><%= c.responsavel || 'Sem responsável' %></span>
+    <span><% if (total > 0) { %><%= total %> <%= total === 1 ? 'comentário' : 'comentários' %> - <% } %><%= fmt.idade(c.createdAt) %></span>
+  </span>
+</a>

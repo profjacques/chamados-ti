@@ -1,0 +1,100 @@
+<%- include('../partials/header', { titulo: chamado.codigo + ' ' + chamado.titulo }) %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="codigo"><%= chamado.codigo %></p>
+    <h1><%= chamado.titulo %></h1>
+    <p class="selos">
+      <span class="selo selo-status-<%= chamado.status %>"><%= C.rotuloStatus(chamado.status) %></span>
+      <span class="selo selo-prio-<%= chamado.prioridade %>">Prioridade <%= C.rotuloPrioridade(chamado.prioridade).toLowerCase() %></span>
+    </p>
+  </div>
+  <a class="botao-contorno" href="/chamados/<%= chamado.id %>/editar">Editar chamado</a>
+</div>
+
+<div class="detalhe">
+  <div class="detalhe-principal">
+    <section class="painel">
+      <h2>Descrição</h2>
+      <p class="texto-livre"><%= chamado.descricao %></p>
+    </section>
+
+    <section class="painel" id="historico">
+      <h2>Histórico</h2>
+
+      <% if (!comentarios.length) { %>
+        <p class="vazio">Nenhuma atividade ainda. Registre o primeiro comentário abaixo.</p>
+      <% } %>
+
+      <ol class="linha-tempo">
+        <% comentarios.forEach(function (m) { %>
+          <% if (m.tipo === 'sistema') { %>
+            <li class="registro-sistema">
+              <span><%= m.texto %></span>
+              <time><%= fmt.dataHora(m.createdAt) %></time>
+            </li>
+          <% } else { %>
+            <li class="registro-nota">
+              <p class="nota-topo"><strong><%= m.autor %></strong> <time><%= fmt.dataHora(m.createdAt) %></time></p>
+              <p class="texto-livre"><%= m.texto %></p>
+            </li>
+          <% } %>
+        <% }) %>
+      </ol>
+
+      <form class="formulario formulario-comentario" method="post" action="/chamados/<%= chamado.id %>/comentarios">
+        <div class="campo">
+          <label for="autor">Seu nome</label>
+          <input id="autor" name="autor" type="text" maxlength="80" required data-lembrar="nome">
+        </div>
+        <div class="campo campo-largo">
+          <label for="texto">Comentário</label>
+          <textarea id="texto" name="texto" rows="3" required placeholder="Atualização, dúvida ou solução aplicada."></textarea>
+        </div>
+        <div class="formulario-acoes campo-largo">
+          <button class="botao" type="submit">Adicionar comentário</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <aside class="detalhe-lateral">
+    <section class="painel">
+      <h2>Andamento</h2>
+      <form class="formulario formulario-compacto" method="post" action="/chamados/<%= chamado.id %>/andamento">
+        <div class="campo">
+          <label for="status">Etapa</label>
+          <select id="status" name="status">
+            <% C.STATUS.forEach(function (s) { %>
+              <option value="<%= s.valor %>" <%= chamado.status === s.valor ? 'selected' : '' %>><%= s.rotulo %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="responsavel">Responsável</label>
+          <input id="responsavel" name="responsavel" type="text" maxlength="100" value="<%= chamado.responsavel || '' %>">
+        </div>
+        <button class="botao" type="submit">Salvar andamento</button>
+      </form>
+    </section>
+
+    <section class="painel">
+      <h2>Informações</h2>
+      <dl class="ficha">
+        <dt>Solicitante</dt><dd><%= chamado.solicitante %></dd>
+        <dt>Setor</dt><dd><%= chamado.setor || '-' %></dd>
+        <dt>Categoria</dt><dd><%= chamado.categoria %></dd>
+        <dt>Aberto em</dt><dd><%= fmt.dataHora(chamado.createdAt) %></dd>
+        <dt>Última alteração</dt><dd><%= fmt.dataHora(chamado.updatedAt) %></dd>
+        <% if (chamado.resolvidoEm) { %><dt>Resolvido em</dt><dd><%= fmt.dataHora(chamado.resolvidoEm) %></dd><% } %>
+      </dl>
+    </section>
+
+    <form method="post" action="/chamados/<%= chamado.id %>/excluir"
+          onsubmit="return confirm('Excluir este chamado e todo o histórico? Esta ação não pode ser desfeita.');">
+      <button class="botao-perigo" type="submit">Excluir chamado</button>
+    </form>
+  </aside>
+</div>
+
+<%- include('../partials/footer') %>

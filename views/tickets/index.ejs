@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Atendimento</p>
+    <h1>Chamados</h1>
+    <p class="subtitle"><%= tickets.length %> <%= tickets.length === 1 ? 'chamado encontrado' : 'chamados encontrados' %></p>
+  </div>
+  <a href="/tickets/new" class="btn btn-primary" id="list-new-ticket"><%- icon('plus') %> Novo chamado</a>
+</header>
+
+<nav class="tabs" aria-label="Filtro rápido por status">
+  <a href="/tickets" class="tab <%= !filtros.status ? 'active' : '' %>" id="tab-todos">Todos</a>
+  <a href="/tickets?status=ativos" class="tab <%= filtros.status === 'ativos' ? 'active' : '' %>" id="tab-ativos">Em aberto</a>
+  <% Object.keys(STATUS).forEach(function (s) { %>
+    <a href="/tickets?status=<%= s %>" class="tab <%= filtros.status === s ? 'active' : '' %>" id="tab-<%= s %>"><span class="dot fill-<%= STATUS[s].cor %>"></span><%= STATUS[s].label %></a>
+  <% }) %>
+</nav>
+
+<form class="filters card" method="GET" action="/tickets" id="filters-form">
+  <div class="search">
+    <%- icon('search') %>
+    <input type="search" name="q" id="filter-q" value="<%= filtros.q %>" placeholder="Buscar por título, solicitante ou protocolo (CH-00001)…" aria-label="Buscar">
+  </div>
+  <input type="hidden" name="status" value="<%= filtros.status %>">
+  <select name="prioridade" id="filter-prioridade" aria-label="Prioridade">
+    <option value="">Todas prioridades</option>
+    <% Object.keys(PRIORIDADES).forEach(function (p) { %>
+      <option value="<%= p %>" <%= filtros.prioridade === p ? 'selected' : '' %>><%= PRIORIDADES[p].label %></option>
+    <% }) %>
+  </select>
+  <select name="categoria" id="filter-categoria" aria-label="Categoria">
+    <option value="">Todas categorias</option>
+    <% categorias.forEach(function (c) { %>
+      <option value="<%= c.id %>" <%= String(filtros.categoria) === String(c.id) ? 'selected' : '' %>><%= c.nome %></option>
+    <% }) %>
+  </select>
+  <select name="tecnico" id="filter-tecnico" aria-label="Técnico">
+    <option value="">Todos técnicos</option>
+    <option value="nenhum" <%= filtros.tecnico === 'nenhum' ? 'selected' : '' %>>Não atribuído</option>
+    <% tecnicos.forEach(function (t) { %>
+      <option value="<%= t.id %>" <%= String(filtros.tecnico) === String(t.id) ? 'selected' : '' %>><%= t.nome %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary" id="filter-submit"><%- icon('filter', 16) %> Filtrar</button>
+  <% if (filtros.q || filtros.prioridade || filtros.categoria || filtros.tecnico) { %>
+    <a href="/tickets<%= filtros.status ? '?status=' + filtros.status : '' %>" class="btn btn-ghost" id="filter-clear"><%- icon('x', 16) %> Limpar</a>
+  <% } %>
+</form>
+
+<section class="card card-flush">
+  <%- include('_table', { tickets: tickets }) %>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Cadastros</p>
+    <h1>Categorias</h1>
+    <p class="subtitle">Organize os chamados por tipo de problema.</p>
+  </div>
+  <a href="/categories/new" class="btn btn-primary" id="cat-new"><%- icon('plus') %> Nova categoria</a>
+</header>
+
+<% if (!categorias.length) { %>
+  <div class="card empty"><%- icon('tag', 36) %><h3>Nenhuma categoria cadastrada</h3><a href="/categories/new" class="btn btn-primary"><%- icon('plus') %> Criar categoria</a></div>
+<% } else { %>
+  <div class="cards-grid">
+    <% categorias.forEach(function (c) { %>
+      <article class="card entity-card category-card" style="--cat: <%= c.cor %>">
+        <div class="entity-head">
+          <span class="cat-icon"><%- icon('tag', 20) %></span>
+          <div>
+            <h3><%= c.nome %></h3>
+            <p class="muted"><%= c.descricao || 'Sem descrição' %></p>
+          </div>
+        </div>
+        <div class="entity-stats">
+          <a href="/tickets?categoria=<%= c.id %>&status=ativos"><strong><%= c.ativos %></strong><span>em aberto</span></a>
+          <a href="/tickets?categoria=<%= c.id %>"><strong><%= c.total %></strong><span>no total</span></a>
+        </div>
+        <div class="entity-actions">
+          <a href="/categories/<%= c.id %>/edit" class="btn btn-secondary btn-sm" id="cat-edit-<%= c.id %>"><%- icon('edit', 14) %> Editar</a>
+          <form method="POST" action="/categories/<%= c.id %>?_method=DELETE" data-confirm="Remover a categoria <%= c.nome %>? Os chamados ficarão sem categoria.">
+            <button type="submit" class="btn btn-ghost btn-sm danger-text" id="cat-delete-<%= c.id %>"><%- icon('trash', 14) %> Remover</button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

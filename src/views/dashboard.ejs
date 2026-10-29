@@ -1,0 +1,40 @@
+<%- include('partials/header', { titulo: 'Painel' }) %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <h1>Painel de chamados</h1>
+    <p class="subtitulo">Cada coluna é uma etapa. Dentro dela, o mais urgente fica no topo.</p>
+  </div>
+</div>
+
+<section class="indicadores" aria-label="Resumo">
+  <div><span class="numero"><%= indicadores.ativos %></span><span class="legenda">chamados ativos</span></div>
+  <div><span class="numero <%= indicadores.urgentes ? 'numero-alerta' : '' %>"><%= indicadores.urgentes %></span><span class="legenda">urgentes (alta ou crítica)</span></div>
+  <div><span class="numero <%= indicadores.semResponsavel ? 'numero-atencao' : '' %>"><%= indicadores.semResponsavel %></span><span class="legenda">sem responsável</span></div>
+  <div><span class="numero"><%= indicadores.resolvidosSemana %></span><span class="legenda">resolvidos nos últimos 7 dias</span></div>
+</section>
+
+<section class="quadro" aria-label="Quadro de chamados">
+  <% colunas.forEach(function (col) { %>
+    <div class="coluna coluna-<%= col.valor %>">
+      <header class="coluna-topo">
+        <h2><%= col.rotulo %></h2>
+        <span class="contagem"><%= col.total %></span>
+      </header>
+
+      <% if (!col.chamados.length) { %>
+        <p class="vazio">Nenhum chamado nesta etapa.</p>
+      <% } %>
+
+      <% col.chamados.forEach(function (c) { %>
+        <%- include('partials/cartao', { c: c, total: comentarios[c.id] || 0 }) %>
+      <% }) %>
+
+      <% if (col.total > col.chamados.length) { %>
+        <a class="ver-todos" href="/chamados?status=<%= col.valor %>">Ver os <%= col.total %> chamados</a>
+      <% } %>
+    </div>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>

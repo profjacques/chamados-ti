@@ -1,0 +1,129 @@
+<%- include('../partials/header') %>
+
+<header class="page-header">
+  <div>
+    <a href="/tickets" class="back-link"><%- icon('back', 16) %> Chamados</a>
+    <div class="title-line">
+      <span class="ticket-code lg"><%= ticket.protocolo %></span>
+      <span class="status status-<%= STATUS[ticket.status].cor %>"><%= STATUS[ticket.status].label %></span>
+      <span class="badge badge-<%= PRIORIDADES[ticket.prioridade].cor %>"><%= PRIORIDADES[ticket.prioridade].label %></span>
+    </div>
+    <h1><%= ticket.titulo %></h1>
+    <p class="subtitle">Aberto <%= timeAgo(ticket.createdAt) %> por <strong><%= ticket.solicitante %></strong></p>
+  </div>
+  <div class="header-actions">
+    <a href="/tickets/<%= ticket.id %>/edit" class="btn btn-secondary" id="ticket-edit"><%- icon('edit', 16) %> Editar</a>
+    <form method="POST" action="/tickets/<%= ticket.id %>?_method=DELETE" data-confirm="Excluir definitivamente o chamado <%= ticket.protocolo %>?">
+      <button type="submit" class="btn btn-danger" id="ticket-delete"><%- icon('trash', 16) %> Excluir</button>
+    </form>
+  </div>
+</header>
+
+<div class="detail-layout">
+  <div class="detail-main">
+    <section class="card">
+      <h2 class="form-section"><%- icon('message') %> Descrição</h2>
+      <div class="description"><%= ticket.descricao %></div>
+    </section>
+
+    <section class="card" id="comentarios">
+      <h2 class="form-section"><%- icon('clock') %> Histórico e comentários <span class="count"><%= ticket.comentarios.length %></span></h2>
+
+      <ol class="timeline">
+        <% ticket.comentarios.forEach(function (c) { %>
+          <% if (c.tipo === 'sistema') { %>
+            <li class="tl-item tl-system">
+              <span class="tl-dot"></span>
+              <p><%= c.mensagem %> <time class="muted" title="<%= formatDate(c.createdAt) %>"><%= timeAgo(c.createdAt) %></time></p>
+            </li>
+          <% } else { %>
+            <li class="tl-item tl-comment">
+              <span class="avatar avatar-sm"><%= c.autor.split(' ').map(function (p) { return p[0]; }).slice(0, 2).join('').toUpperCase() %></span>
+              <div class="bubble">
+                <div class="bubble-head"><strong><%= c.autor %></strong><time class="muted" title="<%= formatDate(c.createdAt) %>"><%= timeAgo(c.createdAt) %></time></div>
+                <p><%= c.mensagem %></p>
+              </div>
+            </li>
+          <% } %>
+        <% }) %>
+      </ol>
+
+      <form method="POST" action="/tickets/<%= ticket.id %>/comments" class="comment-form" id="comment-form">
+        <div class="field">
+          <label for="autor">Seu nome</label>
+          <input type="text" id="autor" name="autor" placeholder="Ex.: Ana Souza" required list="autores">
+          <datalist id="autores">
+            <% tecnicos.forEach(function (t) { %><option value="<%= t.nome %>"><% }) %>
+            <option value="<%= ticket.solicitante %>">
+          </datalist>
+        </div>
+        <div class="field">
+          <label for="mensagem">Comentário</label>
+          <textarea id="mensagem" name="mensagem" rows="3" placeholder="Escreva uma atualização, solução aplicada ou dúvida…" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" id="comment-submit"><%- icon('message', 16) %> Comentar</button>
+      </form>
+    </section>
+  </div>
+
+  <aside class="detail-side">
+    <section class="card">
+      <h2 class="form-section"><%- icon('zap') %> Ações rápidas</h2>
+      <form method="POST" action="/tickets/<%= ticket.id %>/quick?_method=PATCH" id="quick-form">
+        <div class="field">
+          <label for="q-status">Status</label>
+          <select id="q-status" name="status">
+            <% Object.keys(STATUS).forEach(function (s) { %>
+              <option value="<%= s %>" <%= ticket.status === s ? 'selected' : '' %>><%= STATUS[s].label %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="q-prioridade">Prioridade</label>
+          <select id="q-prioridade" name="prioridade">
+            <% Object.keys(PRIORIDADES).forEach(function (p) { %>
+              <option value="<%= p %>" <%= ticket.prioridade === p ? 'selected' : '' %>><%= PRIORIDADES[p].label %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="q-tecnico">Responsável</label>
+          <select id="q-tecnico" name="technicianId">
+            <option value="">Não atribuído</option>
+            <% tecnicos.forEach(function (t) { %>
+              <option value="<%= t.id %>" <%= ticket.technicianId === t.id ? 'selected' : '' %>><%= t.nome %></option>
+            <% }) %>
+            <% if (ticket.tecnico && !tecnicos.some(function (t) { return t.id === ticket.technicianId; })) { %>
+              <option value="<%= ticket.tecnico.id %>" selected><%= ticket.tecnico.nome %> (inativo)</option>
+            <% } %>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="quick-submit"><%- icon('check', 16) %> Atualizar</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="form-section"><%- icon('ticket') %> Informações</h2>
+      <dl class="info-list">
+        <div><dt>Categoria</dt><dd>
+          <% if (ticket.categoria) { %><span class="chip"><span class="dot" style="background: <%= ticket.categoria.cor %>"></span><%= ticket.categoria.nome %></span><% } else { %>—<% } %>
+        </dd></div>
+        <div><dt>Responsável</dt><dd>
+          <% if (ticket.tecnico) { %><span class="person"><span class="avatar avatar-sm"><%= ticket.tecnico.iniciais %></span><%= ticket.tecnico.nome %></span><% } else { %><span class="muted">Não atribuído</span><% } %>
+        </dd></div>
+        <div><dt><%- icon('user', 14) %> Solicitante</dt><dd><%= ticket.solicitante %></dd></div>
+        <% if (ticket.emailSolicitante) { %>
+          <div><dt><%- icon('mail', 14) %> E-mail</dt><dd><a href="mailto:<%= ticket.emailSolicitante %>"><%= ticket.emailSolicitante %></a></dd></div>
+        <% } %>
+        <div><dt><%- icon('building', 14) %> Setor</dt><dd><%= ticket.setor || '—' %></dd></div>
+        <div><dt>Aberto em</dt><dd><%= formatDate(ticket.createdAt) %></dd></div>
+        <div><dt>Última atualização</dt><dd><%= formatDate(ticket.updatedAt) %></dd></div>
+        <% if (ticket.resolvidoEm) { %>
+          <div><dt>Resolvido em</dt><dd><%= formatDate(ticket.resolvidoEm) %> <span class="muted">(<%= formatDuration((ticket.resolvidoEm - ticket.createdAt) / 36e5) %>)</span></dd></div>
+        <% } %>
+      </dl>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/footer') %>

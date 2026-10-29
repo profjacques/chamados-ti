@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof titulo !== 'undefined' && titulo ? titulo + ' - ' : '' %>Chamados de TI</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="topo">
+  <div class="topo-conteudo">
+    <a class="marca" href="/">Chamados de TI</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="/" class="<%= caminho === '/' ? 'ativo' : '' %>">Painel</a>
+      <a href="/chamados" class="<%= caminho === '/chamados' ? 'ativo' : '' %>">Todos os chamados</a>
+    </nav>
+    <a class="botao" href="/chamados/novo">Novo chamado</a>
+  </div>
+</header>
+<main class="conteudo">
+<% if (aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
+<% if (erroGeral) { %><p class="aviso aviso-erro" role="alert"><%= erroGeral %></p><% } %>

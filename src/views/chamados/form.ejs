@@ -1,0 +1,82 @@
+<% const v = chamado || {}; %>
+<%- include('../partials/header', { titulo: titulo }) %>
+
+<div class="cabecalho-pagina">
+  <h1><%= titulo %></h1>
+</div>
+
+<% if (erros && erros.length) { %>
+  <div class="aviso aviso-erro" role="alert">
+    <p>Corrija os pontos abaixo para continuar:</p>
+    <ul>
+      <% erros.forEach(function (e) { %><li><%= e %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form class="formulario painel" method="post" action="<%= acao %>">
+  <div class="campo campo-largo">
+    <label for="titulo">Título</label>
+    <input id="titulo" name="titulo" type="text" maxlength="150" required
+           value="<%= v.titulo || '' %>" placeholder="Ex.: Notebook não liga após atualização">
+  </div>
+
+  <div class="campo campo-largo">
+    <label for="descricao">Descrição do problema</label>
+    <textarea id="descricao" name="descricao" rows="6" required
+              placeholder="O que aconteceu, desde quando e o que já foi tentado."><%= v.descricao || '' %></textarea>
+  </div>
+
+  <div class="campo">
+    <label for="solicitante">Quem está pedindo ajuda</label>
+    <input id="solicitante" name="solicitante" type="text" maxlength="100" required
+           data-lembrar="nome" value="<%= v.solicitante || '' %>">
+  </div>
+
+  <div class="campo">
+    <label for="setor">Setor <span class="opcional">(opcional)</span></label>
+    <input id="setor" name="setor" type="text" maxlength="100" value="<%= v.setor || '' %>">
+  </div>
+
+  <div class="campo">
+    <label for="categoria">Categoria</label>
+    <select id="categoria" name="categoria" required>
+      <% C.CATEGORIAS.forEach(function (cat) { %>
+        <option value="<%= cat %>" <%= (v.categoria || 'Outros') === cat ? 'selected' : '' %>><%= cat %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="campo">
+    <label for="prioridade">Prioridade</label>
+    <select id="prioridade" name="prioridade" required>
+      <% C.PRIORIDADES.forEach(function (p) { %>
+        <option value="<%= p.valor %>" <%= (v.prioridade || 'media') === p.valor ? 'selected' : '' %>><%= p.rotulo %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="campo">
+    <label for="responsavel">Responsável <span class="opcional">(opcional)</span></label>
+    <input id="responsavel" name="responsavel" type="text" maxlength="100" value="<%= v.responsavel || '' %>"
+           placeholder="Quem da TI vai atender">
+  </div>
+
+  <% if (editando) { %>
+    <div class="campo">
+      <label for="status">Etapa</label>
+      <select id="status" name="status" required>
+        <% C.STATUS.forEach(function (s) { %>
+          <option value="<%= s.valor %>" <%= (v.status || 'aberto') === s.valor ? 'selected' : '' %>><%= s.rotulo %></option>
+        <% }) %>
+      </select>
+    </div>
+  <% } %>
+
+  <div class="formulario-acoes campo-largo">
+    <button class="botao" type="submit"><%= textoBotao %></button>
+    <a class="botao-link" href="<%= cancelar %>">Cancelar</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
